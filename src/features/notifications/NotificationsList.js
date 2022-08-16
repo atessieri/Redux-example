@@ -1,17 +1,17 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import classnames from "classnames";
-import { Spinner } from "../../components/Spinner";
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import classnames from 'classnames';
+import { Spinner } from '../../components/Spinner';
 
-import { selectAllUsers } from "../users/usersSlice";
+import { selectAllUsers } from '../users/usersSlice';
 
 import {
   fetchNotifications,
   selectNotificationsAllNotifications,
   selectNotificationsStatus,
-  selectNotificationsMessageError
-} from "./notificationsSlice";
+  selectNotificationsMessageError,
+} from './notificationsSlice';
 
 export const NotificationsList = () => {
   const dispatch = useDispatch();
@@ -21,23 +21,23 @@ export const NotificationsList = () => {
   const errorMessage = useSelector(selectNotificationsMessageError);
 
   useEffect(() => {
-    if (status === "idle") {
+    if (status === 'idle') {
       dispatch(fetchNotifications());
     }
   }, [status, dispatch]);
 
   let renderedNotifications;
-  if (status === "loading") {
-    renderedNotifications = <Spinner text="Loading..." />;
-  } else if (status === "succeeded") {
+  if (status === 'loading') {
+    renderedNotifications = <Spinner text='Loading...' />;
+  } else if (status === 'succeeded') {
     renderedNotifications = notifications.map((notification) => {
       const date = parseISO(notification.date);
       const timeAgo = formatDistanceToNow(date);
       const user = users.find((user) => user.id === notification.user) || {
-        name: "Unknown User"
+        name: 'Unknown User',
       };
-      const notificationClassname = classnames("notification", {
-        new: !notification.read
+      const notificationClassname = classnames('notification', {
+        new: !notification.read,
       });
       return (
         <div key={notification.id} className={notificationClassname}>
@@ -50,11 +50,11 @@ export const NotificationsList = () => {
         </div>
       );
     });
-  } else if (status === "failed") {
+  } else if (status === 'failed') {
     renderedNotifications = <div>{errorMessage}</div>;
   }
   return (
-    <section className="notificationsList">
+    <section className='notificationsList'>
       <h2>Notifications</h2>
       {renderedNotifications}
     </section>

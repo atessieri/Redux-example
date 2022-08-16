@@ -1,12 +1,12 @@
-import { rest, setupWorker } from "msw";
-import { factory, oneOf, manyOf, primaryKey } from "@mswjs/data";
-import { nanoid } from "@reduxjs/toolkit";
-import faker from "faker";
-import seedrandom from "seedrandom";
-import { Server as MockSocketServer } from "mock-socket";
-import { setRandom } from "txtgen";
+import { rest, setupWorker } from 'msw';
+import { factory, oneOf, manyOf, primaryKey } from '@mswjs/data';
+import { nanoid } from '@reduxjs/toolkit';
+import faker from 'faker';
+import seedrandom from 'seedrandom';
+import { Server as MockSocketServer } from 'mock-socket';
+import { setRandom } from 'txtgen';
 
-import { parseISO } from "date-fns";
+import { parseISO } from 'date-fns';
 
 const NUM_USERS = 10;
 const POSTS_PER_USER = 3;
@@ -26,7 +26,7 @@ let useSeededRNG = true;
 let rng = seedrandom();
 
 if (useSeededRNG) {
-  let randomSeedString = localStorage.getItem("randomTimestampSeed");
+  let randomSeedString = localStorage.getItem('randomTimestampSeed');
   let seedDate;
 
   if (randomSeedString) {
@@ -34,7 +34,7 @@ if (useSeededRNG) {
   } else {
     seedDate = new Date();
     randomSeedString = seedDate.toISOString();
-    localStorage.setItem("randomTimestampSeed", randomSeedString);
+    localStorage.setItem('randomTimestampSeed', randomSeedString);
   }
 
   rng = seedrandom(randomSeedString);
@@ -62,22 +62,22 @@ export const db = factory({
     lastName: String,
     name: String,
     username: String,
-    posts: manyOf("post")
+    posts: manyOf('post'),
   },
   post: {
     id: primaryKey(nanoid),
     title: String,
     date: String,
     content: String,
-    reactions: oneOf("reaction"),
-    comments: manyOf("comment"),
-    user: oneOf("user")
+    reactions: oneOf('reaction'),
+    comments: manyOf('comment'),
+    user: oneOf('user'),
   },
   comment: {
     id: primaryKey(String),
     date: String,
     text: String,
-    post: oneOf("post")
+    post: oneOf('post'),
   },
   reaction: {
     id: primaryKey(nanoid),
@@ -86,8 +86,8 @@ export const db = factory({
     heart: Number,
     rocket: Number,
     eyes: Number,
-    post: oneOf("post")
-  }
+    post: oneOf('post'),
+  },
 });
 
 const createUserData = () => {
@@ -98,7 +98,7 @@ const createUserData = () => {
     firstName,
     lastName,
     name: `${firstName} ${lastName}`,
-    username: faker.internet.userName()
+    username: faker.internet.userName(),
   };
 };
 
@@ -108,7 +108,7 @@ const createPostData = (user) => {
     date: faker.date.recent(RECENT_NOTIFICATIONS_DAYS).toISOString(),
     user,
     content: faker.lorem.paragraphs(),
-    reactions: db.reaction.create()
+    reactions: db.reaction.create(),
   };
 };
 
@@ -124,25 +124,21 @@ for (let i = 0; i < NUM_USERS; i++) {
 
 const serializePost = (post) => ({
   ...post,
-  user: post.user.id
+  user: post.user.id,
 });
 
 /* MSW REST API Handlers */
 
 export const handlers = [
-  rest.get("/fakeApi/posts", function (req, res, ctx) {
+  rest.get('/fakeApi/posts', function (req, res, ctx) {
     const posts = db.post.getAll().map(serializePost);
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(posts));
   }),
-  rest.post("/fakeApi/posts", function (req, res, ctx) {
+  rest.post('/fakeApi/posts', function (req, res, ctx) {
     const data = req.body;
 
-    if (data.content === "error") {
-      return res(
-        ctx.delay(ARTIFICIAL_DELAY_MS),
-        ctx.status(500),
-        ctx.json("Server error saving this post!")
-      );
+    if (data.content === 'error') {
+      return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.status(500), ctx.json('Server error saving this post!'));
     }
 
     data.date = new Date().toISOString();
@@ -154,39 +150,33 @@ export const handlers = [
     const post = db.post.create(data);
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(post)));
   }),
-  rest.get("/fakeApi/posts/:postId", function (req, res, ctx) {
+  rest.get('/fakeApi/posts/:postId', function (req, res, ctx) {
     const post = db.post.findFirst({
-      where: { id: { equals: req.params.postId } }
+      where: { id: { equals: req.params.postId } },
     });
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(post)));
   }),
-  rest.patch("/fakeApi/posts/:postId", (req, res, ctx) => {
+  rest.patch('/fakeApi/posts/:postId', (req, res, ctx) => {
     const { id, ...data } = req.body;
     const updatedPost = db.post.update({
       where: { id: { equals: req.params.postId } },
-      data
+      data,
     });
-    return res(
-      ctx.delay(ARTIFICIAL_DELAY_MS),
-      ctx.json(serializePost(updatedPost))
-    );
+    return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(updatedPost)));
   }),
 
-  rest.get("/fakeApi/posts/:postId/comments", (req, res, ctx) => {
+  rest.get('/fakeApi/posts/:postId/comments', (req, res, ctx) => {
     const post = db.post.findFirst({
-      where: { id: { equals: req.params.postId } }
+      where: { id: { equals: req.params.postId } },
     });
-    return res(
-      ctx.delay(ARTIFICIAL_DELAY_MS),
-      ctx.json({ comments: post.comments })
-    );
+    return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json({ comments: post.comments }));
   }),
 
-  rest.post("/fakeApi/posts/:postId/reactions", (req, res, ctx) => {
+  rest.post('/fakeApi/posts/:postId/reactions', (req, res, ctx) => {
     const postId = req.params.postId;
     const reaction = req.body.reaction;
     const post = db.post.findFirst({
-      where: { id: { equals: postId } }
+      where: { id: { equals: postId } },
     });
 
     const updatedPost = db.post.update({
@@ -194,30 +184,23 @@ export const handlers = [
       data: {
         reactions: {
           ...post.reactions,
-          [reaction]: (post.reactions[reaction] += 1)
-        }
-      }
+          [reaction]: (post.reactions[reaction] += 1),
+        },
+      },
     });
 
-    return res(
-      ctx.delay(ARTIFICIAL_DELAY_MS),
-      ctx.json(serializePost(updatedPost))
-    );
+    return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(updatedPost)));
   }),
-  rest.get("/fakeApi/notifications", (req, res, ctx) => {
+  rest.get('/fakeApi/notifications', (req, res, ctx) => {
     const numNotifications = getRandomInt(1, 5);
 
-    let notifications = generateRandomNotifications(
-      undefined,
-      numNotifications,
-      db
-    );
+    let notifications = generateRandomNotifications(undefined, numNotifications, db);
 
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(notifications));
   }),
-  rest.get("/fakeApi/users", (req, res, ctx) => {
+  rest.get('/fakeApi/users', (req, res, ctx) => {
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(db.user.getAll()));
-  })
+  }),
 ];
 
 export const worker = setupWorker(...handlers);
@@ -225,7 +208,7 @@ worker.printHandlers(); // Optional: nice for debugging to see all available rou
 
 /* Mock Websocket Setup */
 
-const socketServer = new MockSocketServer("ws://localhost");
+const socketServer = new MockSocketServer('ws://localhost');
 
 let currentSocket;
 
@@ -238,27 +221,23 @@ const sendMessage = (socket, obj) => {
 const sendRandomNotifications = (socket, since) => {
   const numNotifications = getRandomInt(1, 5);
 
-  const notifications = generateRandomNotifications(
-    since,
-    numNotifications,
-    db
-  );
+  const notifications = generateRandomNotifications(since, numNotifications, db);
 
-  sendMessage(socket, { type: "notifications", payload: notifications });
+  sendMessage(socket, { type: 'notifications', payload: notifications });
 };
 
 export const forceGenerateNotifications = (since) => {
   sendRandomNotifications(currentSocket, since);
 };
 
-socketServer.on("connection", (socket) => {
+socketServer.on('connection', (socket) => {
   currentSocket = socket;
 
-  socket.on("message", (data) => {
+  socket.on('message', (data) => {
     const message = JSON.parse(data);
 
     switch (message.type) {
-      case "notifications": {
+      case 'notifications': {
         const since = message.payload;
         sendRandomNotifications(socket, since);
         break;
@@ -271,12 +250,7 @@ socketServer.on("connection", (socket) => {
 
 /* Random Notifications Generation */
 
-const notificationTemplates = [
-  "poked you",
-  "says hi!",
-  `is glad we're friends`,
-  "sent you a gift"
-];
+const notificationTemplates = ['poked you', 'says hi!', `is glad we're friends`, 'sent you a gift'];
 
 function generateRandomNotifications(since, numNotifications, db) {
   const now = new Date();
@@ -298,7 +272,7 @@ function generateRandomNotifications(since, numNotifications, db) {
       id: nanoid(),
       date: faker.date.between(pastDate, now).toISOString(),
       message: template,
-      user: user.id
+      user: user.id,
     };
   });
 
