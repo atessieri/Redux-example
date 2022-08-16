@@ -1,0 +1,239 @@
+:root {
+  --redux-color: #764abc;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+p {
+  font-size: 1.1rem;
+}
+
+/* Navbar */
+
+nav {
+  display: flex;
+  padding: 0;
+  background: var(--redux-color);
+}
+
+nav section {
+  width: 100%;
+}
+
+nav section h1,
+nav section {
+  color: white;
+}
+
+nav a,
+nav a:active {
+  font-weight: 700;
+  padding: 0.25rem 1.5rem;
+  border-radius: 4px;
+  color: white !important;
+  background: #481499;
+}
+
+nav a:first-of-type {
+  margin-left: -1.5rem;
+}
+
+nav a:hover {
+  color: white;
+  background: #926bcf;
+}
+
+.navContent {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navLinks {
+  display: flex;
+}
+
+.navLinks a {
+  margin-left: 5px;
+}
+
+.navLinks a .badge {
+  margin-left: 5px;
+  position: relative;
+  top: -3px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+  color: #212529;
+  background-color: #f8f9fa;
+}
+
+.navLinks :first-child {
+  margin-left: 0;
+}
+
+/* Main content */
+
+section {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.5rem;
+}
+
+section h1 {
+  font-size: 3rem;
+}
+
+/* Posts list */
+
+.post h2 {
+  font-size: 2.5rem;
+  margin-bottom: 5px;
+}
+
+.post-excerpt {
+  padding: 0.25rem 0.25rem;
+  border: 1px solid rgb(177, 174, 174);
+  border-radius: 7px;
+}
+
+.posts-list .post-excerpt + .post-excerpt {
+  margin-top: 0.5rem;
+}
+
+.posts-container.disabled {
+  opacity: 0.5;
+}
+
+.post-excerpt h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+p.post-content {
+  margin-top: 10px;
+}
+
+.button {
+  display: inline-block;
+  background: #1976d2;
+  color: white;
+  border-radius: 4px;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+}
+
+button:disabled,
+button:disabled:hover {
+  opacity: 0.5;
+}
+
+button.reaction-button {
+  border: 1px solid #e0e3e9;
+  padding: 5px 10px;
+  margin: 5px 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.spinner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner h4 {
+  margin: 10px;
+}
+
+.loader {
+  color: #4c96eb;
+  font-size: 40px;
+  margin: 10px;
+  text-indent: 1em;
+  overflow: hidden;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  transform: translateZ(0);
+  animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+}
+
+@keyframes mltShdSpin {
+  0% {
+    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+  5%,
+  95% {
+    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+  10%,
+  59% {
+    box-shadow: 0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em,
+      -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em,
+      -0.297em -0.775em 0 -0.477em;
+  }
+  20% {
+    box-shadow: 0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em,
+      -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em,
+      -0.749em -0.34em 0 -0.477em;
+  }
+  38% {
+    box-shadow: 0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em,
+      -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em,
+      -0.82em -0.09em 0 -0.477em;
+  }
+  100% {
+    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+}
+
+@keyframes round {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Notifications list */
+
+.notification {
+  border: 1px solid #eee;
+  padding: 0.5rem;
+}
+
+.notificationsList .notification + .notification {
+  border-top: none;
+}
+
+.notification.new {
+  background-color: rgba(29, 161, 242, 0.1);
+}
