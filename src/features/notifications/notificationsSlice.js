@@ -1,6 +1,15 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/toolkit';
 
 import { client } from '../../api/client';
+
+const notificationsAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+});
+
+const initialState = notificationsAdapter.getInitialState({
+  status: 'idle',
+  error: null,
+});
 
 export const fetchNotifications = createAsyncThunk('notifications/fetchNotifications', async (_, { getState }) => {
   const allNotifications = selectNotificationsAllNotifications(getState());
@@ -10,18 +19,12 @@ export const fetchNotifications = createAsyncThunk('notifications/fetchNotificat
   return response.data;
 });
 
-const initialState = {
-  data: [],
-  status: 'idle',
-  error: null,
-};
-
 const notificationsSlice = createSlice({
   name: 'notifications',
   initialState,
   reducers: {
     allNotificationsRead(state) {
-      state.data.forEach((notification) => {
+      Object.values(state.entities).forEach((notification) => {
         notification.read = true;
       });
     },
@@ -30,18 +33,19 @@ const notificationsSlice = createSlice({
     builder
       .addCase(fetchNotifications.pending, (state) => {
         state.status = 'loading';
-        state.data.forEach((item) => (item.read = true));
+        Object.values(state.entities).forEach((notification) => {
+          notification.read = true;
+        });
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        action.payload.forEach((item) =>
-          state.data.push({
-            ...item,
-            read: false,
-          }),
-        );
+        const newNotifications = action.payload.map((notification) => {
+          notification.read = false;
+          return notification;
+        });
+        notificationsAdapter.upsertMany(state, newNotifications);
         // Sort with newest first
-        state.data.sort((a, b) => b.date.localeCompare(a.date));
+        Object.values(state.entities).sort((a, b) => b.date.localeCompare(a.date));
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.status = 'failed';
@@ -54,7 +58,9 @@ export const { allNotificationsRead } = notificationsSlice.actions;
 
 export default notificationsSlice.reducer;
 
-export const selectNotificationsAllNotifications = (state) => state.notifications.data;
+export const { selectAll: selectNotificationsAllNotifications } = notificationsAdapter.getSelectors(
+  (state) => state.notifications,
+);
 
 export const selectNotificationsStatus = (state) => state.notifications.status;
 
