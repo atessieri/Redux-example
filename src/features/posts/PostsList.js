@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PostAuthor } from './PostAuthor';
 import { TimeAgo } from './TimeAgo';
@@ -25,15 +26,22 @@ const PostExcerpt = ({ post }) => {
 };
 
 export const PostsList = () => {
-  const { data: posts, isLoading, isSuccess, isError, error } = useGetPostsQuery();
+  const { data: posts = [], isLoading, isSuccess, isError, error } = useGetPostsQuery();
 
   let content;
+
+  const sortedPosts = useMemo(() => {
+    const sortedPosts = posts.slice();
+    // Sort posts in descending chronological order
+    sortedPosts.sort((a, b) => b.date.localeCompare(a.date));
+    return sortedPosts;
+  }, [posts]);
 
   if (isLoading) {
     content = <Spinner text='Loading...' />;
   } else if (isSuccess) {
     // Sort posts in reverse chronological order by datetime string
-    content = posts.map((postId) => <PostExcerpt key={postId} postId={postId} />);
+    content = sortedPosts.map((post) => <PostExcerpt key={post.Id} post={post} />);
   } else if (isError) {
     content = <div>{error}</div>;
   }
