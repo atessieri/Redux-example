@@ -31,7 +31,7 @@ export const SinglePostPage = ({ match }) => {
       </article>
     );
   } else if (isError) {
-    content = <h2>error</h2>;
+    content = <h2>{error}</h2>;
   }
 
   return <section>{content}</section>;
