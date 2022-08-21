@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, createSelector, createEntityAdapter } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  createSelector,
+  createEntityAdapter,
+} from '@reduxjs/toolkit';
 import { client } from '../../api/client';
 
 const postsAdapter = createEntityAdapter({
@@ -77,6 +82,7 @@ export const {
   // Pass in a selector that returns the posts slice of state
 } = postsAdapter.getSelectors((state) => state.posts);
 
-export const selectPostsByUser = createSelector([selectAllPosts, (state, userId) => userId], (posts, userId) =>
-  posts.filter((post) => post.user === userId),
+export const selectPostsByUser = createSelector(
+  [selectAllPosts, (state, userId) => userId],
+  (posts, userId) => posts.filter((post) => post.user === userId),
 );
