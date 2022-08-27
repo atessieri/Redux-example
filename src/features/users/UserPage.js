@@ -26,7 +26,7 @@ export const UserPage = ({ match }) => {
   const { postsForUser } = useGetPostsQuery(undefined, {
     selectFromResult: (result) => ({
       // We can optionally include the other metadata fields from the result here
-      ...result,
+      // like result: [...result]
       // Include a field called `postsForUser` in the hook result object,
       // which will be a filtered list of posts
       postsForUser: selectPostsForUser(result, userId),
