@@ -1,21 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PostAuthor } from './PostAuthor';
+import { useSelector } from 'react-redux';
 import { TimeAgo } from './TimeAgo';
 import { ReactionButtons } from './ReactionButtons';
-
+import { useGetPostsQuery, selectPostById } from './postsSlice';
+import { useGetUsersQuery } from '../users/usersSlice';
 import { Spinner } from '../../components/Spinner';
-import { useGetPostQuery } from '../api/apiSlice';
 
 export const SinglePostPage = ({ match }) => {
   const { postId } = match.params;
-
-  const { data: post, isFetching, isSuccess, isError, error } = useGetPostQuery(postId);
+  const {
+    isFetching: isFetchingPosts,
+    isSuccess: isSuccessPosts,
+    isError: isErrorPosts,
+    error: errorPosts,
+  } = useGetPostsQuery();
+  const {
+    isFetching: isFetchingUsers,
+    isSuccess: isSuccessUsers,
+    isError: isErrorUsers,
+    error: errorUsers,
+  } = useGetUsersQuery();
+  const post = useSelector((state) => selectPostById(state, postId));
 
   let content;
-  if (isFetching) {
+  if (isFetchingPosts || isFetchingUsers) {
     content = <Spinner text='Loading...' />;
-  } else if (isSuccess) {
+  } else if (isSuccessPosts && isSuccessUsers) {
     content = (
       <article className='post'>
         <h2>{post.title}</h2>
@@ -30,8 +42,10 @@ export const SinglePostPage = ({ match }) => {
         </Link>
       </article>
     );
-  } else if (isError) {
-    content = <h2>{error}</h2>;
+  } else if (isErrorPosts) {
+    content = <h2>{errorPosts}</h2>;
+  } else if (isErrorUsers) {
+    content = <h2>{errorUsers}</h2>;
   }
 
   return <section>{content}</section>;

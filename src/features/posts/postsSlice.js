@@ -1,3 +1,70 @@
+import { createEntityAdapter, createSelector } from '@reduxjs/toolkit';
+import { apiSlice } from '../api/apiSlice';
+
+const emptyArray = [];
+
+const postsAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+});
+
+const initialState = postsAdapter.getInitialState();
+
+export const postsExtendedApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getPosts: builder.query({
+      // The URL for the request is '/fakeApi/posts'
+      query: () => '/posts',
+      transformResponse: (responseData) => postsAdapter.setAll(initialState, responseData),
+      providesTags: (result = [], error, arg) => [
+        { type: 'Post', id: 'LIST' },
+        ...result.ids.map((id) => ({ type: 'Post', id })),
+      ],
+    }),
+    addNewPost: builder.mutation({
+      query: (initialPost) => ({
+        url: '/posts',
+        method: 'POST',
+        // Include the entire post object as the body of the request
+        body: initialPost,
+      }),
+      invalidatesTags: [{ type: 'Post', id: 'LIST' }],
+    }),
+    editPost: builder.mutation({
+      query: (post) => ({
+        url: `/posts/${post.id}`,
+        method: 'PATCH',
+        body: post,
+      }),
+      invalidatesTags: (result, error, arg) => [{ type: 'Post', id: arg.id }],
+    }),
+  }),
+});
+
+export const {
+  useGetPostsQuery,
+  useAddNewPostMutation,
+  useEditPostMutation,
+} = postsExtendedApiSlice;
+
+// Calling `someEndpoint.select(someArg)` generates a new selector that will return
+// the query result object for a query with those parameters.
+// To generate a selector for a specific query argument, call `select(theQueryArg)`.
+// In this case, the users query has no params, so we don't pass anything to select()
+export const selectPostsResult = postsExtendedApiSlice.endpoints.getPosts.select();
+
+const selectPostsData = createSelector(selectPostsResult, (usersResult) => usersResult.data);
+
+export const { selectAll: selectAllPosts, selectById: selectPostById } = postsAdapter.getSelectors(
+  (state) => selectPostsData(state) ?? initialState,
+);
+
+export const selectPostByUserId = createSelector(
+  selectAllPosts,
+  (state, userId) => userId,
+  (data, userId) => data?.filter((post) => post.user === userId) ?? emptyArray,
+);
+
+/*
 import {
   createSlice,
   createAsyncThunk,
@@ -86,3 +153,4 @@ export const selectPostsByUser = createSelector(
   [selectAllPosts, (state, userId) => userId],
   (posts, userId) => posts.filter((post) => post.user === userId),
 );
+*/

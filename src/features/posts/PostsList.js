@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PostAuthor } from './PostAuthor';
 import { TimeAgo } from './TimeAgo';
 import { ReactionButtons } from './ReactionButtons';
 import { Spinner } from '../../components/Spinner';
 import classnames from 'classnames';
-
-import { useGetPostsQuery } from '../api/apiSlice';
+import { useSelector } from 'react-redux';
+import { useGetPostsQuery, selectAllPosts } from '../posts/postsSlice';
+import { useGetUsersQuery } from '../users/usersSlice';
 
 const PostExcerpt = ({ post }) => {
   return (
@@ -27,35 +27,52 @@ const PostExcerpt = ({ post }) => {
 };
 
 export const PostsList = () => {
-  const { data: posts = [], isLoading, isFetching, isSuccess, isError, error, refetch } = useGetPostsQuery();
+  const {
+    isLoading: isLoadingPosts,
+    isFetching: isFetchingPosts,
+    isSuccess: isSuccessPosts,
+    isError: isErrorPosts,
+    error: errorPosts,
+    refetch: refetchPosts,
+  } = useGetPostsQuery();
+  const {
+    isLoading: isLoadingUsers,
+    isFetching: isFetchingUsers,
+    isSuccess: isSuccessUsers,
+    isError: isErrorUsers,
+    error: errorUsers,
+    refetch: refetchUsers,
+  } = useGetUsersQuery();
+  const posts = useSelector(selectAllPosts);
 
   let content;
-
-  const sortedPosts = useMemo(() => {
-    const sortedPosts = posts.slice();
-    // Sort posts in descending chronological order
-    sortedPosts.sort((a, b) => b.date.localeCompare(a.date));
-    return sortedPosts;
-  }, [posts]);
-
-  if (isLoading) {
+  if (isLoadingPosts || isLoadingUsers) {
     content = <Spinner text='Loading...' />;
-  } else if (isSuccess) {
-    const renderedPosts = sortedPosts.map((post) => <PostExcerpt key={post.id} post={post} />);
+  } else if (isSuccessPosts && isSuccessUsers) {
+    const renderedPosts = posts.map((post) => <PostExcerpt key={post.id} post={post} />);
 
     const containerClassname = classnames('posts-container', {
-      disabled: isFetching,
+      disabled: isFetchingPosts || isFetchingUsers,
     });
 
     content = <div className={containerClassname}>{renderedPosts}</div>;
-  } else if (isError) {
-    content = <div>{error}</div>;
+  } else if (isErrorPosts) {
+    content = <div>{errorPosts}</div>;
+  } else if (isErrorUsers) {
+    content = <div>{errorUsers}</div>;
   }
 
   return (
     <section className='posts-list'>
       <h2>Posts</h2>
-      <button onClick={refetch}>Refetch Posts</button>
+      <button
+        onClick={() => {
+          refetchPosts();
+          refetchUsers();
+        }}
+      >
+        Refetch Posts
+      </button>
       {content}
     </section>
   );
