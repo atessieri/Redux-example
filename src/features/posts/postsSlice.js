@@ -37,6 +37,33 @@ export const postsExtendedApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, arg) => [{ type: 'Post', id: arg.id }],
     }),
+    addReaction: builder.mutation({
+      query: ({ postId, reaction }) => ({
+        url: `posts/${postId}/reactions`,
+        method: 'POST',
+        // In a real app, we'd probably need to base this on user ID somehow
+        // so that a user can't do the same reaction more than once
+        body: { reaction },
+      }),
+      async onQueryStarted({ postId, reaction }, { dispatch, queryFulfilled }) {
+        // `updateQueryData` requires the endpoint name and cache key arguments,
+        // so it knows which piece of cache state to update
+        const patchPostsResult = dispatch(
+          postsExtendedApiSlice.util.updateQueryData('getPosts', undefined, (draft) => {
+            // The `draft` is Immer-wrapped and can be "mutated" like in createSlice
+            const post = draft.entities[postId];
+            if (post) {
+              post.reactions[reaction]++;
+            }
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchPostsResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -44,6 +71,7 @@ export const {
   useGetPostsQuery,
   useAddNewPostMutation,
   useEditPostMutation,
+  useAddReactionMutation,
 } = postsExtendedApiSlice;
 
 // Calling `someEndpoint.select(someArg)` generates a new selector that will return
